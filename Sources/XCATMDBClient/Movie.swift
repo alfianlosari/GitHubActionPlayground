@@ -42,12 +42,14 @@ struct Movie: Decodable, Identifiable, Hashable {
         return formatter
     }()
     
+    #if !os(Linux)
     static private let durationFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .full
         formatter.allowedUnits = [.hour, .minute]
         return formatter
     }()
+    #endif
     
     var backdropURL: URL {
         return URL(string: "https://image.tmdb.org/t/p/w500\(backdropPath ?? "")")!
@@ -84,10 +86,16 @@ struct Movie: Decodable, Identifiable, Hashable {
     }
     
     var durationText: String {
+      
+
         guard let runtime = self.runtime, runtime > 0 else {
             return "n/a"
         }
+        #if os(Linux)
+        return String(runtime) + "seconds"
+        #else
         return Movie.durationFormatter.string(from: TimeInterval(runtime) * 60) ?? "n/a"
+        #endif
     }
     
     var cast: [MovieCast]? {
@@ -158,3 +166,4 @@ struct MovieVideo: Decodable, Identifiable {
         return URL(string: "https://youtube.com/watch?v=\(key)")
     }
 }
+

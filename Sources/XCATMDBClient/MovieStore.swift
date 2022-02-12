@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if os(Linux)
+import FoundationNetworking
+#endif
 
 public class MovieStore: MovieService {
     
@@ -64,14 +67,33 @@ public class MovieStore: MovieService {
         guard let finalURL = urlComponents.url else {
             throw MovieError.invalidEndpoint
         }
-        
         let (data, response) = try await urlSession.data(from: finalURL)
-        
         guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
             throw MovieError.invalidResponse
         }
         
         return try self.jsonDecoder.decode(D.self, from: data)
     }
-
 }
+
+// Use Continuation in Linux as URLSession.dataTask async api is not available
+#if os(Linux)
+extension URLSession {
+    
+    func data(from url: URL) async throws -> (Data, URLResponse) {
+        try await withCheckedThrowingContinuation { continuation in
+            dataTask(with: url) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let response = response, let data = data {
+                    continuation.resume(returning: (data, response))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Bad Response"]))
+                }
+            }
+            .resume()
+        }
+    }
+}
+#endif
+
