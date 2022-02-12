@@ -13,7 +13,9 @@ let package = Package(
             name: "XCATMDBClient",
             targets: ["XCATMDBClient"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", branch: "main")
+    ],
     targets: [
         .target(
             name: "XCATMDBClient",
