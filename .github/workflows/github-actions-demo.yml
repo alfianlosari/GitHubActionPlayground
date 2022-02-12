@@ -2,8 +2,8 @@ name: GitHub Actions Demo
 on: [push]
 jobs:
   container:
-    runs-on: ubuntu-20.04
-    container: swiftlang/swift:nightly-5.6-focal
+    runs-on: ubuntu-18.04
+    container: swiftlang/swift:nightly-5.6-bionic # swiftlang/swift:nightly-5.6-focal
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
